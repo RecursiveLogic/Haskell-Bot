@@ -18,6 +18,8 @@ import Servant
 
 import qualified Network.WebSockets as WS
 
+baseURL = "https://discordapp.com/api"
+
 type Client = (Text, WS.Connection)
 type ServerState = [Client]
 
