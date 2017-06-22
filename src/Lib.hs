@@ -1,40 +1,37 @@
 {-# LANGUAGE DataKinds       #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeOperators   #-}
+
 module Lib
     ( startApp
-    , app
     ) where
 
+import Control.Concurrent (MVar, newMVar, modifyMVar_, modifyMVar, readMVar)
+import Control.Exception (finally)
+import Control.Monad (forM_, forever)
 import Data.Aeson
 import Data.Aeson.TH
+import Data.Char (isPunctuation, isSpace)
+import Data.Monoid (mappend)
+import Data.Text (Text)
 import Network.Wai
 import Network.Wai.Handler.Warp
 import Servant
 
-data User = User
-  { userId        :: Int
-  , userFirstName :: String
-  , userLastName  :: String
-  } deriving (Eq, Show)
+import qualified Network.WebSockets as WS
 
-$(deriveJSON defaultOptions ''User)
+type Client = (Text, WS.Connection)
+type ServerState = [Client]
 
-type API = "users" :> Get '[JSON] [User]
+newServerState :: ServerState
+newServerState = []
+
+application :: MVar ServerState -> WS.ServerApp
+application state pending = do
+  conn <- WS.acceptRequest pending
+  WS.forkPingThread conn 30
 
 startApp :: IO ()
-startApp = run 8080 app
-
-app :: Application
-app = serve api server
-
-api :: Proxy API
-api = Proxy
-
-server :: Server API
-server = return users
-
-users :: [User]
-users = [ User 1 "Isaac" "Newton"
-        , User 2 "Albert" "Einstein"
-        ]
+startApp = do
+  state <- newMVar newServerState
+  WS.runServer "127.0.0.1" 9160 $ application state
