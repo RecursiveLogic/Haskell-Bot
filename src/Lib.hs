@@ -17,7 +17,7 @@ import Data.Bits
 import Data.Char (isPunctuation, isSpace)
 import Data.Hashable
 import Data.Monoid (mappend)
-import Data.Text (Text)
+import Data.Text (Text, unpack)
 import Data.Word
 import Network.Wreq hiding (Auth)
 import Network.Wai
@@ -77,12 +77,12 @@ newServerState = []
 getURL :: IO String
 getURL = do
   r <- get $ baseURL ++ "/v6/gateway"
-  return $ r ^. responseBody ^. key "url" . _String
+  return . unpack $ r ^. responseBody ^. key "url" . _String
 
 runGateway :: ClientApp () -> IO ()
 runGateway ws = do
   url <- getURL
-  runSecureClient gatewayURL 443 jsonEncoding
+  runSecureClient gatewayURL 443 jsonEncoding ws
 
 application :: MVar ServerState -> ServerApp
 application state pending = do
