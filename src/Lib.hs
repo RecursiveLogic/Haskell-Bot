@@ -18,10 +18,37 @@ import Network.Wai.Handler.Warp
 import Network.WebSockets
 import Servant
 
+baseURL :: String
 baseURL = "https://discordapp.com/api"
 
 type Client = (Text, Connection)
 type ServerState = [Client]
+
+data Auth =
+    Bot String
+  | Client String
+  | Bearer String
+
+data Role = Role
+  { roleID :: String
+  , roleName :: String
+  , roleColor :: Integer
+  , roleHoist :: Bool
+  , rolePos :: Integer
+  , rolePerms :: Integer
+  , roleManaged :: Bool
+  , roleMention :: Bool
+  } deriving (Eq, Show)
+
+instance Show Auth where
+  show (Bot    token) = "Bot " ++ token
+  show (Client token) = token
+  show (Bearer token) = "Bearer " ++ token
+
+authToken :: Auth -> String
+authToken (Bot    token) = token
+authToken (Client token) = token
+authToken (Bearer token) = token
 
 newServerState :: ServerState
 newServerState = []
@@ -35,4 +62,3 @@ startApp :: IO ()
 startApp = do
   state <- newMVar newServerState
   runServer "127.0.0.1" 9160 $ application state
-  liftIO $ putStrLn "Websocket server running on port 9160"
