@@ -2,9 +2,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeOperators   #-}
 
-module Lib
-    ( startApp
-    ) where
+module Lib ( startApp ) where
 
 import Control.Concurrent (MVar, newMVar, modifyMVar_, modifyMVar, readMVar)
 import Control.Exception (finally)
