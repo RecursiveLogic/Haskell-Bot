@@ -27,7 +27,7 @@ library
                      , wuss
   default-language:    Haskell2010
 
-executable haskell-bot-exe
+executable haskell-bot
   hs-source-dirs:      app
   main-is:             Main.hs
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
