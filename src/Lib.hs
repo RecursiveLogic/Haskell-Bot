@@ -1,6 +1,7 @@
-{-# LANGUAGE DataKinds       #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeOperators   #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE DataKinds #-}
 
 module Lib ( startApp ) where
 
@@ -10,9 +11,12 @@ import Control.Monad (forM_, forever)
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
 import Data.Aeson.TH
+import Data.Bits
 import Data.Char (isPunctuation, isSpace)
+import Data.Hashable
 import Data.Monoid (mappend)
 import Data.Text (Text)
+import Data.Word
 import Network.Wai
 import Network.Wai.Handler.Warp
 import Network.WebSockets
@@ -20,6 +24,9 @@ import Servant
 
 baseURL :: String
 baseURL = "https://discordapp.com/api"
+
+newtype Snowflake = Snowflake Word64
+  deriving (Eq, Ord, Show, Num, Integral, Enum, Real, Bits, Hashable)
 
 type Client = (Text, Connection)
 type ServerState = [Client]
@@ -30,7 +37,7 @@ data Auth =
   | Bearer String
 
 data Role = Role
-  { roleID :: String
+  { roleID :: {-# UNPACK #-} !Snowflake
   , roleName :: String
   , roleColor :: Integer
   , roleHoist :: Bool
