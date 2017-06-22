@@ -26,7 +26,7 @@ baseURL :: String
 baseURL = "https://discordapp.com/api"
 
 newtype Snowflake = Snowflake Word64
-  deriving (Eq, Ord, Show, Num, Integral, Enum, Real, Bits, Hashable)
+  deriving (Eq, Ord, Num, Integral, Enum, Real, Bits, Hashable)
 
 type Client = (Text, Connection)
 type ServerState = [Client]
@@ -46,6 +46,9 @@ data Role = Role
   , roleManaged :: Bool
   , roleMention :: Bool
   } deriving (Eq, Show)
+
+instance Show Snowflake where
+  show (Snowflake a) = show a
 
 instance Show Auth where
   show (Bot    token) = "Bot " ++ token
