@@ -20,13 +20,15 @@ library
                      , aeson
                      , bytestring
                      , hashable
-                     , req
+                     , lens
+                     , lens-aeson
                      , servant-server
                      , text
                      , url
                      , wai
                      , warp
                      , websockets
+                     , wreq
                      , wuss
   default-language:    Haskell2010
 

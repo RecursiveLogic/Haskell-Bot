@@ -7,9 +7,11 @@ module Lib ( startApp ) where
 
 import Control.Concurrent (MVar, newMVar, modifyMVar_, modifyMVar, readMVar)
 import Control.Exception (finally)
+import Control.Lens ((^.))
 import Control.Monad (forM_, forever)
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
+import Data.Aeson.Lens
 import Data.Aeson.TH
 import Data.Bits
 import Data.Char (isPunctuation, isSpace)
@@ -17,16 +19,22 @@ import Data.Hashable
 import Data.Monoid (mappend)
 import Data.Text (Text)
 import Data.Word
+import Network.Wreq hiding (Auth)
 import Network.Wai
 import Network.Wai.Handler.Warp
 import Network.WebSockets
+import Network.URL
 import Servant
+import Wuss
 
 baseURL :: String
 baseURL = "https://discordapp.com/api"
 
-gateway :: String
-gateway = "wss://gateway.discord.gg/"
+gatewayURL :: String
+gatewayURL = "gateway.discord.gg"
+
+jsonEncoding :: String
+jsonEncoding = "/?v=6&encoding=json"
 
 newtype Snowflake = Snowflake Word64
   deriving (Eq, Ord, Num, Integral, Enum, Real, Bits, Hashable)
@@ -65,6 +73,16 @@ authToken (Bearer token) = token
 
 newServerState :: ServerState
 newServerState = []
+
+getURL :: IO String
+getURL = do
+  r <- get $ baseURL ++ "/v6/gateway"
+  return $ r ^. responseBody ^. key "url" . _String
+
+runGateway :: ClientApp () -> IO ()
+runGateway ws = do
+  url <- getURL
+  runSecureClient gatewayURL 443 jsonEncoding
 
 application :: MVar ServerState -> ServerApp
 application state pending = do
