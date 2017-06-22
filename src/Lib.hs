@@ -25,6 +25,9 @@ import Servant
 baseURL :: String
 baseURL = "https://discordapp.com/api"
 
+gateway :: String
+gateway = "wss://gateway.discord.gg/"
+
 newtype Snowflake = Snowflake Word64
   deriving (Eq, Ord, Num, Integral, Enum, Real, Bits, Hashable)
 
